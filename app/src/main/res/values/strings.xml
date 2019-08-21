@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Booking Room</string>
+    <string name="error_work_space_title">please add workspace title</string>
+</resources>
