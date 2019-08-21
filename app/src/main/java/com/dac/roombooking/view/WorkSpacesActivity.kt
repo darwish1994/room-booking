@@ -1,6 +1,5 @@
 package com.dac.roombooking.view
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -11,14 +10,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dac.roombooking.R
 import com.dac.roombooking.base.BaseActivity
 import com.dac.roombooking.view.adapter.WorkSpaceAdapter
-import com.dac.roombooking.viewmodel.WorkSpaceViewModel
+import com.dac.roombooking.viewmodel.WorkSpacesViewModel
 import kotlinx.android.synthetic.main.activity_work_spaces.*
 
 class WorkSpacesActivity : BaseActivity() {
 
     private val ADD_WORK_SPACE_REQUEST = 100
     private lateinit var workSpacesAdapter: WorkSpaceAdapter
-    private lateinit var viewModel: WorkSpaceViewModel
+    private lateinit var viewModel: WorkSpacesViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +37,7 @@ class WorkSpacesActivity : BaseActivity() {
 
 
         // add view model
-        viewModel = ViewModelProviders.of(this).get(WorkSpaceViewModel::class.java)
+        viewModel = ViewModelProviders.of(this).get(WorkSpacesViewModel::class.java)
         viewModel.getWorkSpaceLiveDatra().observe(this, Observer {
             workSpacesAdapter.updateList(it)
         })
@@ -49,18 +48,18 @@ class WorkSpacesActivity : BaseActivity() {
         startActivityForResult(Intent(this, AddWorkSpace::class.java), ADD_WORK_SPACE_REQUEST)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK)
-            when (requestCode) {
-                ADD_WORK_SPACE_REQUEST -> {
-                    if (data != null) {
-                        viewModel.addWorkSpace(data.getStringExtra("title"), data.getStringExtra("char"))
-                    }
-                }
-
-
-            }
-    }
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        if (resultCode == Activity.RESULT_OK)
+//            when (requestCode) {
+//                ADD_WORK_SPACE_REQUEST -> {
+//                    if (data != null) {
+//                        viewModel.addWorkSpace(data.getStringExtra("title"), data.getStringExtra("char"))
+//                    }
+//                }
+//
+//
+//            }
+//    }
 
 }

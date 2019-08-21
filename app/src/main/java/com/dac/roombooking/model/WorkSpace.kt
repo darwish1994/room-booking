@@ -1,13 +1,18 @@
 package com.dac.roombooking.model
 
+import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
-import java.util.*
+import kotlinx.android.parcel.Parcelize
 
+@Parcelize
 open class WorkSpace(
 
     @PrimaryKey
-    var id: String? = UUID.randomUUID().toString(),
-    var title: String? = null,
-    var group: String? = null
-) : RealmObject()
+    @SerializedName("title")
+    var name: String? = null,
+    @SerializedName("icon")
+    var icon: String? = null,
+    var link: String? = null
+) : RealmObject(), Parcelable

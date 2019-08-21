@@ -1,5 +1,5 @@
 
-package com.dac.roombooking.network.model;
+package com.dac.roombooking.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

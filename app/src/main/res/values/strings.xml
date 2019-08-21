@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Booking Room</string>
     <string name="error_work_space_title">please add workspace title</string>
+    <string name="work_space_host_not_valid">workspace host is not vaild</string>
 </resources>

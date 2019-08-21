@@ -17,15 +17,16 @@
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning"
             >
+        <activity android:name=".view.RoomDetailsActivity">
+        </activity>
         <activity android:name=".view.WorkSpaceActivity">
         </activity>
-
         <activity
                 android:name=".view.AddWorkSpace"
+                android:configChanges="orientation|keyboard"
                 android:theme="@style/AppTheme.no_actionbar"
                 >
         </activity>
-
         <activity
                 android:name=".view.WorkSpacesActivity"
                 android:theme="@style/AppTheme.no_actionbar"

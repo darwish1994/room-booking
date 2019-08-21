@@ -1,6 +1,8 @@
 package com.dac.roombooking.network.apicalls
 
-import com.dac.roombooking.network.model.Room
+import com.dac.roombooking.model.Room
+import com.dac.roombooking.model.WorkSpace
+import com.google.gson.JsonObject
 import io.reactivex.Single
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -10,10 +12,10 @@ interface ApiCalls {
 
 
     @GET("workspace")
-    fun getworkspace(): Single<W>
+    fun getworkspace(): Single<WorkSpace>
 
     @POST("getrooms")
-    fun getRooms(@Body date: String): Single<List<Room>>
+    fun getRooms(@Body date: JsonObject): Single<List<Room>>
 
 
 }

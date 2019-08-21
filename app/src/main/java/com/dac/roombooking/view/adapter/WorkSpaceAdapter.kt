@@ -1,13 +1,17 @@
 package com.dac.roombooking.view.adapter
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.dac.roombooking.R
+import com.dac.roombooking.model.GlideApp
 import com.dac.roombooking.model.WorkSpace
+import com.dac.roombooking.view.WorkSpaceActivity
 import kotlinx.android.synthetic.main.item_workspace_layout.view.*
+import timber.log.Timber
 
 class WorkSpaceAdapter(val context: Context) : RecyclerView.Adapter<WorkSpaceAdapter.WorkerSpaceViewHolder>() {
 
@@ -30,8 +34,12 @@ class WorkSpaceAdapter(val context: Context) : RecyclerView.Adapter<WorkSpaceAda
     override fun onBindViewHolder(holder: WorkerSpaceViewHolder, position: Int) {
         if (!workspaces.isNullOrEmpty()) {
             val item = workspaces!![position]
-            holder.spaceChar.text = item.group
-            holder.spaceTitle.text = item.title
+            Timber.v("wrkspace name %s", item.name)
+            holder.spaceTitle.text = item.name
+            GlideApp.with(context).load(item.link + item.icon).into(holder.icon)
+            holder.workSpaceItem.setOnClickListener {
+                context.startActivity(Intent(context, WorkSpaceActivity::class.java).putExtra("workspace", item))
+            }
 
 
         }
@@ -45,8 +53,10 @@ class WorkSpaceAdapter(val context: Context) : RecyclerView.Adapter<WorkSpaceAda
     }
 
     inner class WorkerSpaceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val spaceChar = itemView.work_space_char
+        val icon = itemView.work_space_char
         val spaceTitle = itemView.work_space_title
+        val workSpaceItem = itemView.work_space_item
+
     }
 
 
