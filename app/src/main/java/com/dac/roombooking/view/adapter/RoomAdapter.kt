@@ -120,6 +120,10 @@ class RoomAdapter(val context: Context, val url: String) : RecyclerView.Adapter<
         notifyDataSetChanged()
     }
 
+    fun getrooms(): List<Room>? {
+        return rooms
+    }
+
     inner class RoomViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageSwitcher = itemView.slider
         val availavble = itemView.availablity

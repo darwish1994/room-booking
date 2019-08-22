@@ -39,7 +39,7 @@ class BookTimeAdapter(val context: Context, val viewmodel: RoomViewModel) :
 
             holder.time_item.setOnClickListener {
                 viewmodel.selectedTimes = time
-                viewmodel.mapChanges.value = time
+                viewmodel.sellectTimeChangeLiveData.value = time
                 notifyDataSetChanged()
             }
 

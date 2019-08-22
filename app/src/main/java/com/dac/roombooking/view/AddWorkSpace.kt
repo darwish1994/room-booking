@@ -19,8 +19,13 @@ class AddWorkSpace : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_work_space)
 
+        // create view model for add work space activity
         viewmodel = ViewModelProviders.of(this).get(AddWorkSpaceVewModel::class.java)
 
+        /** listen for get workspace api result
+         * if return code is 404 not found it means that no work space with this link
+         *
+         * */
         viewmodel.getRequestResult().observe(this, Observer {
             hideLoading()
             save_btn.isEnabled = true
@@ -39,6 +44,16 @@ class AddWorkSpace : BaseActivity() {
 
     }
 
+    /**
+     * fun for call get workspace with url entered by user
+     * check if user add url with "https" or not
+     * if not it add it for url
+     * check if url last char is "/" for prevent retrofit url error
+     * if request success it will save it in repo
+     * realm save data in background
+     * to prevent leak ui
+     *
+     * */
     fun addWorkspace(view: View) {
         var url = workspace_name.editText!!.text.toString().trim()
         if (url.isEmpty()) {

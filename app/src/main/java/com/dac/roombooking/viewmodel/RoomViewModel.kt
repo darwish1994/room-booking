@@ -20,7 +20,7 @@ import java.util.*
 class RoomViewModel : ViewModel() {
 
     var selectedTimes = ""
-    val mapChanges: MutableLiveData<String> = MutableLiveData()
+    val sellectTimeChangeLiveData: MutableLiveData<String> = MutableLiveData()
     val dateTimeformate = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.GERMANY)
     val dateformate = SimpleDateFormat("dd-MM-yyyy", Locale.GERMANY)
 
@@ -132,6 +132,8 @@ class RoomViewModel : ViewModel() {
                         list.add(i)
                     }
                 }
+
+                realm.close()
 
                 return@map list
             }

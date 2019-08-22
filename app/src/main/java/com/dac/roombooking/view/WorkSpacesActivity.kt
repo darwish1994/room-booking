@@ -38,28 +38,21 @@ class WorkSpacesActivity : BaseActivity() {
 
         // add view model
         viewModel = ViewModelProviders.of(this).get(WorkSpacesViewModel::class.java)
+        /** get changes on stored workspaces
+         * and update view
+         */
         viewModel.getWorkSpaceLiveDatra().observe(this, Observer {
             workSpacesAdapter.updateList(it)
         })
 
     }
 
+    /**
+     * send user to create work space
+     * */
     fun addWorkspace(view: View) {
         startActivityForResult(Intent(this, AddWorkSpace::class.java), ADD_WORK_SPACE_REQUEST)
     }
 
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//        if (resultCode == Activity.RESULT_OK)
-//            when (requestCode) {
-//                ADD_WORK_SPACE_REQUEST -> {
-//                    if (data != null) {
-//                        viewModel.addWorkSpace(data.getStringExtra("title"), data.getStringExtra("char"))
-//                    }
-//                }
-//
-//
-//            }
-//    }
 
 }
