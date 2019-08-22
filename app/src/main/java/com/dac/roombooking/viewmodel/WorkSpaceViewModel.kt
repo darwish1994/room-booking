@@ -10,14 +10,26 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
 class WorkSpaceViewModel : ViewModel() {
-    private val repo = RoomRebo()
-    private val compositdissposable = CompositeDisposable()
-    val roomResult = repo.roomLiveData
+    private val repo = RoomRebo() // room repo for all api calls and result
+    private val compositdissposable = CompositeDisposable() // container for rx observable dispose
 
+    val roomResult = repo.roomLiveData // listener for result of api calls and update filters
+    val errorLiveData = repo.responseErrorlive
+    /**
+     * call get rooms api
+     * url for different workspaces
+     * date for request body which like {"date" : "unix timestamp| now | today"}
+     **/
     fun getRooms(url: String, date: JsonObject) {
         compositdissposable.add(repo.getRooms(url, date))
     }
 
+
+    /**
+     * take query and check if room name contains this query
+     * it also check if user activate available check box or not
+     *
+     * */
     fun searchFilter(query: String, rooms: List<Room>, availble: Boolean) {
         compositdissposable.addAll(
             Observable.just(rooms)
@@ -44,7 +56,10 @@ class WorkSpaceViewModel : ViewModel() {
 
     }
 
-
+    /**
+     * filter current rooms with available times
+     *
+     * */
     fun filterAvilable(rooms: List<Room>) {
         compositdissposable.addAll(
             Observable.just(rooms)
@@ -70,7 +85,7 @@ class WorkSpaceViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        compositdissposable.dispose()
+        compositdissposable.dispose() // dispose all rxjava observable
     }
 
 }

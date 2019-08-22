@@ -15,6 +15,7 @@ import com.dac.roombooking.base.BaseActivity
 import com.dac.roombooking.model.WorkSpace
 import com.dac.roombooking.view.adapter.RoomAdapter
 import com.dac.roombooking.viewmodel.WorkSpaceViewModel
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonObject
 import kotlinx.android.synthetic.main.activity_work_space.*
 import timber.log.Timber
@@ -64,7 +65,16 @@ class WorkSpaceActivity : BaseActivity() {
 
         })
 
-        // check
+        // room request error
+        viewModel.errorLiveData.observe(this, Observer {
+
+            Snackbar.make(main_view, it.error.text, Snackbar.LENGTH_SHORT).show()
+
+        })
+
+        /**
+         * check box listener for available
+         * */
         avilable_btn.setOnCheckedChangeListener { compoundButton, b ->
             if (b) {
                 if (!roomAdapter.getrooms().isNullOrEmpty())

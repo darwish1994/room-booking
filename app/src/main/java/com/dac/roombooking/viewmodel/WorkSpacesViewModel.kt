@@ -12,20 +12,22 @@ class WorkSpacesViewModel : ViewModel() {
     private val workSpace: MutableLiveData<List<WorkSpace>> = MutableLiveData()
 
     init {
+        // realm change lister for get changes on table of work spaces
         realm.where(WorkSpace::class.java).findAllAsync().addChangeListener { t: RealmResults<WorkSpace> ->
             workSpace.value = t
         }
     }
 
 
+    // get live date for workspace parameter which is updated by realm change listener
     fun getWorkSpaceLiveDatra(): LiveData<List<WorkSpace>> {
         return workSpace
     }
 
     override fun onCleared() {
         super.onCleared()
-        realm.removeAllChangeListeners()
-        realm.close()
+        realm.removeAllChangeListeners() // remove all realm listen to prevent memory leak
+        realm.close() // close realm instance to prevent leak
     }
 
 }

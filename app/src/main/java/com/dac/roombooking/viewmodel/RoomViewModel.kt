@@ -19,24 +19,31 @@ import java.util.*
 
 class RoomViewModel : ViewModel() {
 
-    var selectedTimes = ""
-    val sellectTimeChangeLiveData: MutableLiveData<String> = MutableLiveData()
-    val dateTimeformate = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.GERMANY)
-    val dateformate = SimpleDateFormat("dd-MM-yyyy", Locale.GERMANY)
 
+    var selectedTimes = "" // select times value if empty it means user has not select one yet  if not he select
+    val sellectTimeChangeLiveData: MutableLiveData<String> =
+        MutableLiveData() // live data for select item listen for changes
+    val dateTimeformate = SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.GERMANY)  // date format date and time
+    val dateformate = SimpleDateFormat("dd-MM-yyyy", Locale.GERMANY) // date format date only
 
-    private val composite = CompositeDisposable()
-    private val roomrepo = RoomRebo()
+    private val composite = CompositeDisposable() // disposable container
+
+    private val roomrepo = RoomRebo() // repo for all room action and api calls
+
     var date: String? = null
     var url: String? = null
     var room: Room? = null
 
 
-    val bookRoomLiveData = roomrepo.sendpassLiveData
-    val saveEvent = MutableLiveData<Boolean>()
-    val timesLiveData = MutableLiveData<List<String>>()
+    val bookRoomLiveData = roomrepo.sendpassLiveData // listen for book api result
+    val saveEvent = MutableLiveData<Boolean>() // listen for save event to database result
+    val timesLiveData = MutableLiveData<List<String>>() // filter times live data
 
-
+    /**
+     * calls booking api
+     * create body object for api to send it as body of request
+     * it check all required files
+     * */
     fun bookTimes(title: String, description: String, pasess: List<Passes>): Boolean {
 
         if (date != null && url != null && room != null && selectedTimes.isNotEmpty()) {
@@ -84,7 +91,10 @@ class RoomViewModel : ViewModel() {
 
     }
 
-
+    /**
+     * save event to database
+     * for filter times in next time
+     * */
     fun saveEventtoDb() {
         if (date != null && room != null && selectedTimes.isNotEmpty()) {
             val event = Event()
@@ -148,7 +158,7 @@ class RoomViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        composite.dispose()
+        composite.dispose() // dispose all rxjave observable to prevent memory leak
     }
 
 }

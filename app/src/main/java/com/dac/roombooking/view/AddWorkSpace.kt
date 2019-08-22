@@ -32,6 +32,8 @@ class AddWorkSpace : BaseActivity() {
             if (it.error) {
                 when (it.code) {
                     404 -> workspace_name.error = resources.getString(R.string.work_space_host_not_valid)
+                    500 -> workspace_name.error = resources.getString(R.string.serer_proble)
+                    -1 -> workspace_name.error = resources.getString(R.string.network_error)
                 }
             } else {
                 setResult(Activity.RESULT_OK)

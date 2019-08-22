@@ -70,7 +70,6 @@
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
                     android:gravity="center"
-                    android:text="Each and every turn of life all of us need motivation to achieve our goal and to be succeed as a human being. When we determine to do something best then if we get support from our nearest person it will be more easy to raise on the top"
                     android:textColor="@color/purple"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"

@@ -19,6 +19,7 @@ import androidx.viewpager.widget.ViewPager
 import com.dac.roombooking.R
 import com.dac.roombooking.base.BaseActivity
 import com.dac.roombooking.model.Passes
+import com.dac.roombooking.model.ResponseError
 import com.dac.roombooking.model.Room
 import com.dac.roombooking.view.adapter.BookTimeAdapter
 import com.dac.roombooking.view.adapter.ParticipantAdapter
@@ -27,6 +28,7 @@ import com.dac.roombooking.view.fragmenr.DoneFragment
 import com.dac.roombooking.viewmodel.RoomViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_room_details.*
 import timber.log.Timber
 
@@ -36,6 +38,7 @@ class RoomDetailsActivity : BaseActivity() {
     private lateinit var imageAdapter: ViewPagerAdapter
     private lateinit var viewmodel: RoomViewModel
     private lateinit var passesAdapter: ParticipantAdapter
+    private val gson = Gson()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -149,16 +152,20 @@ class RoomDetailsActivity : BaseActivity() {
             hideLoading()
             if (it == null) {
                 // show user error
+                Snackbar.make(main_view, "some thing go wrong try again", Snackbar.LENGTH_SHORT).show()
 
             } else {
+
+                // if book success
                 if (it.has("success")) {
                     // save event data to db
                     viewmodel.saveEventtoDb()
 
-                } else if (it.has("error")) {
-
-                    //TODO show message for user enable him to solve proplem
-
+                }
+                // if book fail show message with error
+                else if (it.has("error")) {
+                    val error = gson.fromJson(it, ResponseError::class.java)
+                    Snackbar.make(main_view, error.error.text, Snackbar.LENGTH_SHORT).show()
                 }
 
 
@@ -173,7 +180,12 @@ class RoomDetailsActivity : BaseActivity() {
          */
         viewmodel.saveEvent.observe(this, Observer {
             if (it) {
-                supportFragmentManager.beginTransaction().replace(R.id.container, DoneFragment()).commit()
+                val doneFragment = DoneFragment()
+                val bundel = Bundle()
+                bundel.putString("date", viewmodel.date)
+                bundel.putString("time", viewmodel.selectedTimes)
+                doneFragment.arguments = bundel
+                supportFragmentManager.beginTransaction().replace(R.id.container, doneFragment).commit()
             }
 
 
