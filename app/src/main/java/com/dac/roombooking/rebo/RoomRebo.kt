@@ -12,6 +12,7 @@ import timber.log.Timber
 class RoomRebo {
     private val apiManager = ApiManager
     val roomLiveData = MutableLiveData<List<Room>>()
+    val sendpassLiveData = MutableLiveData<JsonObject>()
     fun getRooms(url: String, json: JsonObject): Disposable {
         return apiManager.getCallsAPI(url).getRooms(json)
             .subscribeOn(Schedulers.io())
@@ -23,6 +24,24 @@ class RoomRebo {
 
                 override fun onError(e: Throwable) {
                     roomLiveData.postValue(null)
+                    Timber.e(e)
+
+                }
+            })
+
+    }
+
+    fun sendpass(url: String, json: JsonObject): Disposable {
+        return apiManager.getCallsAPI(url).sendpass(json)
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.newThread())
+            .subscribeWith(object : DisposableSingleObserver<JsonObject>() {
+                override fun onSuccess(t: JsonObject) {
+                    sendpassLiveData.postValue(t)
+                }
+
+                override fun onError(e: Throwable) {
+                    sendpassLiveData.postValue(null)
                     Timber.e(e)
 
                 }

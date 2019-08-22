@@ -22,7 +22,7 @@
             android:textSize="14sp"
             android:textColor="@color/yellow"
             android:background="@drawable/bt_bg"
-            android:id="@+id/button"
+            android:id="@+id/book_btn"
             app:layout_constraintWidth_max="300dp"
             android:onClick="addWorkspace"
             />
@@ -34,7 +34,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/button"
+            app:layout_constraintBottom_toTopOf="@+id/book_btn"
             android:layout_marginBottom="16dp"
             />
 

@@ -17,19 +17,30 @@
             android:theme="@style/AppTheme"
             tools:ignore="GoogleAppIndexingWarning"
             >
-        <activity android:name=".view.RoomDetailsActivity">
+        <activity
+                android:name=".view.RoomDetailsActivity"
+                android:screenOrientation="portrait"
+                android:parentActivityName=".view.WorkSpaceActivity"
+                >
         </activity>
-        <activity android:name=".view.WorkSpaceActivity">
+        <activity
+                android:name=".view.WorkSpaceActivity"
+                android:screenOrientation="portrait"
+                android:parentActivityName=".view.WorkSpacesActivity"
+                >
         </activity>
         <activity
                 android:name=".view.AddWorkSpace"
                 android:configChanges="orientation|keyboard"
                 android:theme="@style/AppTheme.no_actionbar"
+                android:screenOrientation="portrait"
+                android:parentActivityName=".view.WorkSpacesActivity"
                 >
         </activity>
         <activity
                 android:name=".view.WorkSpacesActivity"
                 android:theme="@style/AppTheme.no_actionbar"
+                android:screenOrientation="portrait"
                 >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

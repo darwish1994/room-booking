@@ -2,4 +2,6 @@
 <resources>
     <dimen name="di_16">16dp</dimen>
     <dimen name="di_8">8dp</dimen>
+    <dimen name="di_64">64dp</dimen>
+    <dimen name="fo_18">18sp</dimen>
 </resources>

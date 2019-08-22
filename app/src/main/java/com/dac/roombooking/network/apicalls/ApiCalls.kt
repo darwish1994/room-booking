@@ -17,5 +17,10 @@ interface ApiCalls {
     @POST("getrooms")
     fun getRooms(@Body date: JsonObject): Single<List<Room>>
 
+    @POST("sendpass")
+    fun sendpass(@Body data: JsonObject): Single<JsonObject>
+
+
+
 
 }

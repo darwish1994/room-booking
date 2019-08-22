@@ -2,6 +2,7 @@ package com.dac.roombooking.view.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.dac.roombooking.R
 import com.dac.roombooking.model.Room
+import com.dac.roombooking.view.RoomDetailsActivity
 import kotlinx.android.synthetic.main.room_item_layout.view.*
 import timber.log.Timber
 
@@ -18,6 +20,7 @@ import timber.log.Timber
 class RoomAdapter(val context: Context, val url: String) : RecyclerView.Adapter<RoomAdapter.RoomViewHolder>() {
     private val inflator = LayoutInflater.from(context)
     private var rooms: List<Room>? = null
+    private var date: String? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RoomViewHolder {
         return RoomViewHolder(inflator.inflate(R.layout.room_item_layout, parent, false))
@@ -95,15 +98,25 @@ class RoomAdapter(val context: Context, val url: String) : RecyclerView.Adapter<
 
                 }
             })
-
+            holder.room_item.setOnClickListener {
+                // check for user select date
+                if (date != null) {
+                    val intent = Intent(context, RoomDetailsActivity::class.java)
+                    intent.putExtra("room", room)
+                    intent.putExtra("url", url)
+                    intent.putExtra("date", date)
+                    context.startActivity(intent)
+                }
+            }
 
         }
 
 
     }
 
-    fun updateRooms(data: List<Room>?) {
+    fun updateRooms(data: List<Room>?, date: String) {
         rooms = data
+        this.date = date
         notifyDataSetChanged()
     }
 
@@ -116,6 +129,8 @@ class RoomAdapter(val context: Context, val url: String) : RecyclerView.Adapter<
         val capacity = itemView.capacity_value
         val equipment = itemView.equipment_value
         val dots_containers = itemView.dot_containerr
+        val room_item = itemView.room_item
+
 
     }
 }

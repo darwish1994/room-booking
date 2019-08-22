@@ -31,12 +31,17 @@ class WorkSpaceActivity : BaseActivity() {
 
         viewModel = ViewModelProviders.of(this).get(WorkSpaceViewModel::class.java)
         // get available rooms for now
-        date_vale.text = "Now"
+        date_vale.text = "now"
 
 
         try {
             workSpace = intent.getParcelableExtra("workspace")
+
+            // call api for get rooms with date "now"
             loading("now")
+
+            // change activity toolbar with workspace name
+            title = workSpace?.name
 
             roomAdapter = RoomAdapter(this, workSpace!!.link!!)
             rooms_rec.adapter = roomAdapter
@@ -49,15 +54,7 @@ class WorkSpaceActivity : BaseActivity() {
 
         viewModel.roomResult.observe(this, Observer {
             hideLoading()
-            roomAdapter.updateRooms(it)
-
-            if (it != null) {
-            }
-            // some error happen
-            else {
-                Timber.e("error in loading rooms")
-
-            }
+            roomAdapter.updateRooms(it, date_vale.text.toString())
 
         })
 
@@ -93,7 +90,7 @@ class WorkSpaceActivity : BaseActivity() {
         val year = cldr.get(Calendar.YEAR)
         // date picker dialog
         val picker = DatePickerDialog(this, { view1, year1, monthOfYear, dayOfMonth ->
-            date_vale.text = "$dayOfMonth - ${monthOfYear + 1} - $year1"
+            date_vale.text = "$dayOfMonth-${monthOfYear + 1}-$year1"
             val date = dateFormat.parse("$dayOfMonth-${monthOfYear + 1}-$year1")
             if (workSpace != null) {
                 loading(Timestamp(date!!.time).time)
