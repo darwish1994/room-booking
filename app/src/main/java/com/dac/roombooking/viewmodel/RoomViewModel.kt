@@ -66,9 +66,8 @@ class RoomViewModel : ViewModel() {
                     booking.addProperty("time_end", dateTimeformate.parse("$todayDate ${timepartes[1].trim()}")!!.time)
                 }
 
-
             } else {
-                booking.addProperty("title", dateformate.parse(date)!!.time)
+                booking.addProperty("date", dateformate.parse(date)!!.time)
                 booking.addProperty("time_start", dateTimeformate.parse("$date ${timepartes[0].trim()}")!!.time)
                 booking.addProperty("time_end", dateTimeformate.parse("$date ${timepartes[1].trim()}")!!.time)
             }
