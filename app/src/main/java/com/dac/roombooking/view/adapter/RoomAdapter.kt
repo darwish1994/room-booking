@@ -11,7 +11,7 @@ import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.dac.roombooking.R
-import com.dac.roombooking.model.Room
+import com.dac.roombooking.data.model.Room
 import com.dac.roombooking.view.RoomDetailsActivity
 import kotlinx.android.synthetic.main.room_item_layout.view.*
 import timber.log.Timber

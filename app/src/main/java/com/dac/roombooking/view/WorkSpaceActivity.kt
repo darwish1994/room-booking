@@ -12,7 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.dac.roombooking.R
 import com.dac.roombooking.base.BaseActivity
-import com.dac.roombooking.model.WorkSpace
+import com.dac.roombooking.data.model.WorkSpace
 import com.dac.roombooking.view.adapter.RoomAdapter
 import com.dac.roombooking.viewmodel.WorkSpaceViewModel
 import com.google.android.material.snackbar.Snackbar

@@ -1,4 +1,4 @@
-package com.dac.roombooking.model
+package com.dac.roombooking.data.model
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName

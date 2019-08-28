@@ -1,4 +1,4 @@
-package com.dac.roombooking.model
+package com.dac.roombooking.data.model
 
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey

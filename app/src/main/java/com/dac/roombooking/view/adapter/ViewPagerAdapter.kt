@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.viewpager.widget.PagerAdapter
 import com.dac.roombooking.R
-import com.dac.roombooking.model.GlideApp
+import com.dac.roombooking.data.model.GlideApp
 
 class ViewPagerAdapter(val context: Context, val images: List<String>?, val url: String) : PagerAdapter() {
     private val inflater = LayoutInflater.from(context)

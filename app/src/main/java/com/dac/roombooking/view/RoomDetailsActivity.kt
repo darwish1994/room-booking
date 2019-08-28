@@ -18,9 +18,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.dac.roombooking.R
 import com.dac.roombooking.base.BaseActivity
-import com.dac.roombooking.model.Passes
-import com.dac.roombooking.model.ResponseError
-import com.dac.roombooking.model.Room
+import com.dac.roombooking.data.model.Passes
+import com.dac.roombooking.data.model.ResponseError
+import com.dac.roombooking.data.model.Room
 import com.dac.roombooking.view.adapter.BookTimeAdapter
 import com.dac.roombooking.view.adapter.ParticipantAdapter
 import com.dac.roombooking.view.adapter.ViewPagerAdapter

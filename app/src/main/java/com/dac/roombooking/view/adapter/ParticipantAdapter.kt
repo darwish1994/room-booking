@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.dac.roombooking.R
-import com.dac.roombooking.model.Passes
+import com.dac.roombooking.data.model.Passes
 import kotlinx.android.synthetic.main.participant_item_layout.view.*
 
 class ParticipantAdapter(val context: Context) :

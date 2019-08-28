@@ -1,6 +1,6 @@
 package com.dac.roombooking.network.apicalls
 
-import com.dac.roombooking.model.WorkSpace
+import com.dac.roombooking.data.model.WorkSpace
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import io.reactivex.Single

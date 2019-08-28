@@ -1,7 +1,7 @@
 package com.dac.roombooking.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.dac.roombooking.model.Room
+import com.dac.roombooking.data.model.Room
 import com.dac.roombooking.rebo.RoomRebo
 import com.google.gson.JsonObject
 import io.reactivex.Observable

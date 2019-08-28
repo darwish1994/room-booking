@@ -1,61 +1,82 @@
 package com.dac.roombooking.view.adapter
 
-import android.content.Context
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import com.dac.roombooking.R
-import com.dac.roombooking.model.GlideApp
-import com.dac.roombooking.model.WorkSpace
-import com.dac.roombooking.view.WorkSpaceActivity
+import com.dac.roombooking.data.callbacks.WorkspaceSelectListener
+import com.dac.roombooking.data.model.GlideApp
+import com.dac.roombooking.data.model.WorkSpace
+import com.dac.roombooking.viewmodel.WorkSpacesViewModel
 import kotlinx.android.synthetic.main.item_workspace_layout.view.*
-import timber.log.Timber
 
-class WorkSpaceAdapter(val context: Context) : RecyclerView.Adapter<WorkSpaceAdapter.WorkerSpaceViewHolder>() {
+class WorkSpaceAdapter(
+    viewModel: WorkSpacesViewModel,
+    lifecycleOwner: LifecycleOwner,
+    listener: WorkspaceSelectListener
+) : RecyclerView.Adapter<WorkSpaceAdapter.WorkerSpaceViewHolder>() {
 
-    var workspaces: List<WorkSpace>? = null
-    val layoutInflator = LayoutInflater.from(context)
+    var workspaces: ArrayList<WorkSpace> = arrayListOf()
+    private val workspaceSelectListener: WorkspaceSelectListener = listener
 
+    init {
+        /** get changes on stored workspaces
+         * and update view
+         */
+        viewModel.getWorkSpaceLiveDatra().observe(lifecycleOwner, Observer {
+            workspaces.clear()
+            workspaces.addAll(it)
+            notifyDataSetChanged()
+        })
+
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WorkerSpaceViewHolder {
-
-        return WorkerSpaceViewHolder(layoutInflator.inflate(R.layout.item_workspace_layout, parent, false))
+        return WorkerSpaceViewHolder(
+            LayoutInflater.from(parent.context).inflate(
+                R.layout.item_workspace_layout,
+                parent,
+                false
+            ), workspaceSelectListener
+        )
     }
 
     override fun getItemCount(): Int {
-        if (workspaces != null)
-            return workspaces!!.size
-        return 0
+        return workspaces.size
     }
 
 
     override fun onBindViewHolder(holder: WorkerSpaceViewHolder, position: Int) {
         if (!workspaces.isNullOrEmpty()) {
-            val item = workspaces!![position]
-            Timber.v("wrkspace name %s", item.name)
-            holder.spaceTitle.text = item.name
-            GlideApp.with(context).load(item.link + item.icon).into(holder.icon)
-            holder.workSpaceItem.setOnClickListener {
-                context.startActivity(Intent(context, WorkSpaceActivity::class.java).putExtra("workspace", item))
-            }
-
-
+            holder.bind(workspaces[position])
         }
-
-
     }
 
-    fun updateList(list: List<WorkSpace>) {
-        workspaces = list
-        notifyDataSetChanged()
-    }
 
-    inner class WorkerSpaceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class WorkerSpaceViewHolder(
+        itemView: View,
+        workspaceSelectListener: WorkspaceSelectListener
+    ) : RecyclerView.ViewHolder(itemView) {
         val icon = itemView.work_space_char
         val spaceTitle = itemView.work_space_title
-        val workSpaceItem = itemView.work_space_item
+        private var workspace: WorkSpace? = null
+
+        init {
+            itemView.setOnClickListener {
+                if (workspace != null)
+                    workspaceSelectListener.onWorkspaceSelect(workspace!!)
+
+            }
+        }
+
+        fun bind(item: WorkSpace) {
+            workspace = item
+            spaceTitle.text = workspace!!.name
+            GlideApp.with(itemView.context).load(workspace!!.link + workspace!!.icon).into(icon)
+        }
 
     }
 

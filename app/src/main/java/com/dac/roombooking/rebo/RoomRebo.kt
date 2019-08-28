@@ -1,8 +1,8 @@
 package com.dac.roombooking.rebo
 
 import androidx.lifecycle.MutableLiveData
-import com.dac.roombooking.model.ResponseError
-import com.dac.roombooking.model.Room
+import com.dac.roombooking.data.model.ResponseError
+import com.dac.roombooking.data.model.Room
 import com.dac.roombooking.network.ApiManager
 import com.google.gson.Gson
 import com.google.gson.JsonArray

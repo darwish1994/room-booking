@@ -2,9 +2,9 @@ package com.dac.roombooking.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.dac.roombooking.model.Event
-import com.dac.roombooking.model.Passes
-import com.dac.roombooking.model.Room
+import com.dac.roombooking.data.model.Event
+import com.dac.roombooking.data.model.Passes
+import com.dac.roombooking.data.model.Room
 import com.dac.roombooking.rebo.RoomRebo
 import com.google.gson.Gson
 import com.google.gson.JsonObject

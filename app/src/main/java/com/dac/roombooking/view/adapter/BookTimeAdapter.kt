@@ -12,10 +12,15 @@ import kotlinx.android.synthetic.main.time_item_layout.view.*
 class BookTimeAdapter(val context: Context, val viewmodel: RoomViewModel) :
     RecyclerView.Adapter<BookTimeAdapter.BookTimeViewHolder>() {
     private var times: List<String>? = null
-    private val inflator = LayoutInflater.from(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookTimeViewHolder {
-        return BookTimeViewHolder(inflator.inflate(R.layout.time_item_layout, parent, false))
+        return BookTimeViewHolder(
+            LayoutInflater.from(parent.context).inflate(
+                R.layout.time_item_layout,
+                parent,
+                false
+            )
+        )
 
     }
 

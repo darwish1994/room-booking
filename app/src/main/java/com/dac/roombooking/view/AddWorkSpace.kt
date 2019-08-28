@@ -22,26 +22,28 @@ class AddWorkSpace : BaseActivity() {
         // create view model for add work space activity
         viewmodel = ViewModelProviders.of(this).get(AddWorkSpaceVewModel::class.java)
 
-        /** listen for get workspace api result
-         * if return code is 404 not found it means that no work space with this link
-         *
-         * */
-        viewmodel.getRequestResult().observe(this, Observer {
-            hideLoading()
+        viewmodel.getMessage().observe(this, Observer {
+            workspace_name.error = it
+        })
+        viewmodel.getLoadingStatus().observe(this, Observer {
+            if (it)
+                showLoading()
+            else
+                hideLoading()
+        })
+        viewmodel.getSuccessStatus().observe(this, Observer {
             save_btn.isEnabled = true
-            if (it.error) {
-                when (it.code) {
-                    404 -> workspace_name.error = resources.getString(R.string.work_space_host_not_valid)
-                    500 -> workspace_name.error = resources.getString(R.string.serer_proble)
-                    -1 -> workspace_name.error = resources.getString(R.string.network_error)
-                }
-            } else {
+            if (it) {
                 setResult(Activity.RESULT_OK)
                 finish()
             }
 
-
         })
+
+        /** listen for get workspace api result
+         * if return code is 404 not found it means that no work space with this link
+         *
+         * */
 
 
     }
