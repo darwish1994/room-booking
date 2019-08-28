@@ -3,12 +3,12 @@ package com.dac.roombooking.base
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import com.dac.roombooking.R
 import com.github.ybq.android.spinkit.style.Wave
+import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.loading_layout.view.*
 
-open class BaseActivity : AppCompatActivity() {
+open class BaseActivity : DaggerAppCompatActivity() {
     private var alertDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
