@@ -4,31 +4,31 @@ import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.app.SearchManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
 import androidx.appcompat.widget.SearchView
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.dac.roombooking.R
 import com.dac.roombooking.base.BaseActivity
+import com.dac.roombooking.data.callbacks.RoomSelectListener
+import com.dac.roombooking.data.model.Room
 import com.dac.roombooking.data.model.WorkSpace
 import com.dac.roombooking.view.adapter.RoomAdapter
 import com.dac.roombooking.viewmodel.WorkSpaceViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.google.gson.JsonObject
 import kotlinx.android.synthetic.main.activity_work_space.*
 import timber.log.Timber
-import java.sql.Timestamp
-import java.text.SimpleDateFormat
 import java.util.*
 
-class WorkSpaceActivity : BaseActivity() {
+class WorkSpaceActivity : BaseActivity(), RoomSelectListener {
+
+
     private lateinit var viewModel: WorkSpaceViewModel
     private lateinit var roomAdapter: RoomAdapter
     private var workSpace: WorkSpace? = null
 
-    private val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.GERMANY)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,13 +43,14 @@ class WorkSpaceActivity : BaseActivity() {
         try {
             workSpace = intent.getParcelableExtra("workspace")
 
+            viewModel.workSpace = workSpace!!
             // call api for get rooms with date "now"
-            loading("now")
+            viewModel.loadingRooms("now")
 
             // change activity toolbar with workspace name
             title = workSpace?.name
 
-            roomAdapter = RoomAdapter(this, workSpace!!.link!!)
+            roomAdapter = RoomAdapter(workSpace!!.link!!, viewModel, this, this)
             rooms_rec.adapter = roomAdapter
 
         } catch (e: NullPointerException) {
@@ -57,20 +58,6 @@ class WorkSpaceActivity : BaseActivity() {
             hideLoading()
         }
 
-
-        // update rooms ui with returned data
-        viewModel.roomResult.observe(this, Observer {
-            hideLoading()
-            roomAdapter.updateRooms(it, date_vale.text.toString())
-
-        })
-
-        // room request error
-        viewModel.errorLiveData.observe(this, Observer {
-
-            Snackbar.make(main_view, it.error.text, Snackbar.LENGTH_SHORT).show()
-
-        })
 
         /**
          * check box listener for available
@@ -80,45 +67,28 @@ class WorkSpaceActivity : BaseActivity() {
                 if (!roomAdapter.getrooms().isNullOrEmpty())
                     viewModel.filterAvilable(roomAdapter.getrooms()!!)
             } else {
-                reloadData()
+                viewModel.loadingRooms(date_vale.text.toString())
             }
 
         }
 
 
-    }
+        viewModel.getShowLoadingLiveData().observe(this, androidx.lifecycle.Observer {
+            if (it)
+                showLoading()
+            else
+                hideLoading()
+        })
 
-    /**
-     * fun set api request with new date
-     * this used if date is string
-     * create request body for api calls
-     *
-     * */
-    fun loading(date: String) {
-        val jsonDate = JsonObject()
-        jsonDate.addProperty("date", date)
-        showLoading()
-        Timber.v(jsonDate.toString())
-        viewModel.getRooms(workSpace?.link!!, jsonDate)
+        viewModel.getErrorResponseLiveData().observe(this, androidx.lifecycle.Observer {
+
+            Snackbar.make(main_view, it.error.text, Snackbar.LENGTH_SHORT).show()
+
+        })
 
 
     }
 
-    /**
-     * fun set api request with new date
-     * this used if date is timestamp
-     * create request body for api calls
-     *
-     * */
-    fun loading(date: Long) {
-        val jsonDate = JsonObject()
-        jsonDate.addProperty("date", date)
-        showLoading()
-        Timber.v(jsonDate.toString())
-        viewModel.getRooms(workSpace?.link!!, jsonDate)
-
-
-    }
 
     /**
      * show calender with start date form today
@@ -136,9 +106,8 @@ class WorkSpaceActivity : BaseActivity() {
         // date picker dialog
         val picker = DatePickerDialog(this, { view1, year1, monthOfYear, dayOfMonth ->
             date_vale.text = "$dayOfMonth-${monthOfYear + 1}-$year1"
-            val date = dateFormat.parse("$dayOfMonth-${monthOfYear + 1}-$year1")
             if (workSpace != null) {
-                loading(Timestamp(date!!.time).time)
+                viewModel.loadingRooms(date_vale.text.toString())
             }
 
         }, year, month, day)
@@ -166,7 +135,7 @@ class WorkSpaceActivity : BaseActivity() {
                     viewModel.searchFilter(query, roomAdapter.getrooms()!!, avilable_btn.isChecked)
 
                 } else {
-                    reloadData()
+                    viewModel.loadingRooms(date_vale.text.toString())
 
                 }
 
@@ -176,8 +145,7 @@ class WorkSpaceActivity : BaseActivity() {
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (newText.isNullOrBlank()) {
-
-                    reloadData()
+                    viewModel.loadingRooms(date_vale.text.toString())
 
                 }
 
@@ -188,17 +156,19 @@ class WorkSpaceActivity : BaseActivity() {
         return true
     }
 
-    fun reloadData() {
 
-        if (date_vale.text.toString().equals("now", true) || date_vale.text.toString().equals("today", true)) {
-
-            loading(date_vale.text.toString())
-        } else {
-
-            loading(dateFormat.parse(date_vale.text.toString()).time)
-        }
-
-
+    override fun selectRoom(room: Room) {
+        val intent = Intent(applicationContext, RoomDetailsActivity::class.java)
+        intent.putExtra("room", room)
+        intent.putExtra("workSpace", viewModel.workSpace)
+        intent.putExtra("date", date_vale.text.toString())
+        startActivity(intent)
     }
 
+
+    override fun onResume() {
+        super.onResume()
+        // update view after finish or back from  room Activity
+        viewModel.loadingRooms(date_vale.text.toString())
+    }
 }

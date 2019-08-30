@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.request.RequestOptions
 import com.dac.roombooking.R
 import com.dac.roombooking.data.callbacks.WorkspaceSelectListener
 import com.dac.roombooking.data.model.GlideApp
@@ -75,7 +76,11 @@ class WorkSpaceAdapter(
         fun bind(item: WorkSpace) {
             workspace = item
             spaceTitle.text = workspace!!.name
-            GlideApp.with(itemView.context).load(workspace!!.link + workspace!!.icon).into(icon)
+            GlideApp.with(itemView.context).setDefaultRequestOptions(
+                RequestOptions().placeholder(R.drawable.ic_image_holder)
+                    .error(R.drawable.ic_broken_image)
+            ).load(workspace!!.link + workspace!!.icon)
+                .into(icon)
         }
 
     }

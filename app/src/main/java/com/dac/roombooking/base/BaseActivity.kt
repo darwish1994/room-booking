@@ -13,6 +13,10 @@ open class BaseActivity : DaggerAppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        /**
+         * why i make dialog here as oop all activity class will inherts from this activity so i can call it on all activity
+         * */
+
 
         val builder = AlertDialog.Builder(this, R.style.CustomDialog)
         val view = LayoutInflater.from(this).inflate(R.layout.loading_layout, null, false)
@@ -35,8 +39,12 @@ open class BaseActivity : DaggerAppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        /**
+         * if activity destroy and dialog is showing it will dismiss and clear  it
+         * */
         if (alertDialog != null)
             alertDialog!!.dismiss()
+        alertDialog = null
 
     }
 }

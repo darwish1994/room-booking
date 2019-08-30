@@ -1,63 +1,98 @@
 package com.dac.roombooking.view.adapter
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.recyclerview.widget.RecyclerView
 import com.dac.roombooking.R
-import com.dac.roombooking.data.model.Passes
+import com.dac.roombooking.data.callbacks.ParticipateSelection
+import com.dac.roombooking.data.model.Participate
 import kotlinx.android.synthetic.main.participant_item_layout.view.*
 
-class ParticipantAdapter(val context: Context) :
+/**
+ * adapter for show participate and interact with their data like edit and delete
+ *
+ * */
+class ParticipantAdapter(private val listener: ParticipateSelection) :
     RecyclerView.Adapter<ParticipantAdapter.PassViewHolder>() {
-    private var passes: ArrayList<Passes>? = null
-    private val inflator = LayoutInflater.from(context)
+    private var passes: ArrayList<Participate> = arrayListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PassViewHolder {
-        return PassViewHolder(inflator.inflate(R.layout.participant_item_layout, parent, false))
+        return PassViewHolder(
+            LayoutInflater.from(parent.context).inflate(
+                R.layout.participant_item_layout,
+                parent,
+                false
+            ), listener
+        )
 
     }
 
     override fun getItemCount(): Int {
-        if (passes != null)
-            return passes!!.size
-        return 0
-
+        return passes.size
     }
 
     override fun onBindViewHolder(holder: PassViewHolder, position: Int) {
-        if (passes != null) {
-            val item = passes!![position]
-            holder.name.text = item.name
-            holder.email.text = item.email
-            holder.phone.text = item.number
-
-
-        }
-
+        holder.bind(passes[position])
     }
 
-    fun addPasses(data: Passes) {
-        if (passes != null) {
-            passes!!.add(data)
-            notifyItemInserted(passes!!.size - 1)
-        } else {
-            passes = arrayListOf(data)
-            notifyDataSetChanged()
-
-        }
+    fun addPasses(data: Participate) {
+        passes.add(data)
+        notifyItemInserted(passes.size - 1)
     }
 
-    fun getpasses(): List<Passes>? {
+
+    fun getpasses(): List<Participate>? {
         return passes
     }
 
-    inner class PassViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class PassViewHolder(itemView: View, listener: ParticipateSelection) : RecyclerView.ViewHolder(itemView) {
 
-        val name = itemView.name_value
-        val email = itemView.email_value
-        val phone = itemView.phone_value
+        private val name = itemView.name_value
+        private val email = itemView.email_value
+        private val phone = itemView.phone_value
+        private val moreOp = itemView.more_options
+        private lateinit var participate: Participate
+
+        init {
+            moreOp.setOnClickListener { view ->
+                val popupMenu = PopupMenu(itemView.context, view)
+                popupMenu.inflate(R.menu.options_menu)
+                popupMenu.show()
+                popupMenu.setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        R.id.delete_item -> {
+                            if (::participate.isInitialized) {
+                                val indexOfParticipate = passes.indexOf(participate)
+                                passes.remove(participate)
+                                notifyItemRemoved(indexOfParticipate)
+                            }
+
+                        }
+                        R.id.edit_item -> {
+                            if (::participate.isInitialized)
+                                listener.editParticipate(passes.indexOf(participate), participate)
+                        }
+
+
+                    }
+
+                    return@setOnMenuItemClickListener false
+                }
+
+
+            }
+
+        }
+
+        fun bind(item: Participate) {
+            participate = item
+            name.text = participate.name
+            email.text = participate.email
+            phone.text = participate.number
+
+        }
 
 
     }

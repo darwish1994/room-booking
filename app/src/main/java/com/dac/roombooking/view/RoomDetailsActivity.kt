@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.dac.roombooking.R
 import com.dac.roombooking.base.BaseActivity
-import com.dac.roombooking.data.model.Passes
-import com.dac.roombooking.data.model.ResponseError
+import com.dac.roombooking.data.callbacks.ParticipateSelection
+import com.dac.roombooking.data.model.Participate
 import com.dac.roombooking.data.model.Room
 import com.dac.roombooking.view.adapter.BookTimeAdapter
 import com.dac.roombooking.view.adapter.ParticipantAdapter
@@ -28,17 +28,16 @@ import com.dac.roombooking.view.fragmenr.DoneFragment
 import com.dac.roombooking.viewmodel.RoomViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
-import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_room_details.*
 import timber.log.Timber
 
-class RoomDetailsActivity : BaseActivity() {
+class RoomDetailsActivity : BaseActivity(), ParticipateSelection {
+
 
     private lateinit var timesAdapter: BookTimeAdapter
     private lateinit var imageAdapter: ViewPagerAdapter
     private lateinit var viewmodel: RoomViewModel
     private lateinit var passesAdapter: ParticipantAdapter
-    private val gson = Gson()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,64 +49,42 @@ class RoomDetailsActivity : BaseActivity() {
 
         // adapter for view participate user
         passesAdapter = ParticipantAdapter(this)
-        //add participate adapter to participate recyclar
+        //add participate adapter to participate recycler
         participant_rec.adapter = passesAdapter
 
         //  available times adapter
-        timesAdapter = BookTimeAdapter(this, viewmodel)
+        timesAdapter = BookTimeAdapter(viewmodel, this)
 
         time_rec.adapter = timesAdapter
 
-        val layoutmanager = GridLayoutManager(this, 3, RecyclerView.VERTICAL, false)
-        time_rec.layoutManager = layoutmanager
+        val layoutManager = GridLayoutManager(this, 3, RecyclerView.VERTICAL, false)
+        time_rec.layoutManager = layoutManager
 
         try {
             // get data from intent
-            val url = intent.getStringExtra("url")
-            val roomData = intent.getParcelableExtra<Room>("room")
-            val date = intent.getStringExtra("date")
-
-            //set data to view model
-            viewmodel.date = date
-            viewmodel.url = url
-            viewmodel.room = roomData
+            viewmodel.room = intent.getParcelableExtra<Room>("room")
+            viewmodel.workspace = intent.getParcelableExtra("workSpace")
+            viewmodel.date = intent.getStringExtra("date")
 
 
             // change activity toolbar with room name
-            title = roomData.name
+            title = viewmodel.room?.name
+
             /**
              * this fun for filter times
              * it check every times if it has booked before or not
              * and return result in live data response
              * */
-            viewmodel.filterTimes(roomData!!.avail)
+            viewmodel.filterTimes()
 
-            /** create image slider adapter for room images
-             * user can slide for images
-             * images load using glide library
+            /** create image slider adapter for room imageList
+             * user can slide for imageList
+             * imageList load using glide library
              */
-            imageAdapter = ViewPagerAdapter(this, roomData.images, url!!)
+            imageAdapter = ViewPagerAdapter(viewmodel.room!!.images, viewmodel.workspace.link!!)
             image_slider.adapter = imageAdapter
 
-            /** create dots for slider
-             * add layout prams for dots prams is make image wrap content
-             * prams is make image margin 8 dp *
-             * */
-            val params = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            params.setMargins(8, 0, 8, 0)
-            dot_container.removeAllViews()
-            for (i in roomData.images) {
-                val image = ImageView(this)
-                image.layoutParams = params
-                image.setImageResource(R.drawable.n_active_squire)
-                dot_container.addView(image)
-            }
-            // change first dot layout
-            if (dot_container.getChildAt(0) != null)
-                (dot_container.getChildAt(0) as ImageView).setImageResource(R.drawable.active_squire)
+            createDotes(0)
 
             // add listener of slider paging
             image_slider.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
@@ -119,14 +96,7 @@ class RoomDetailsActivity : BaseActivity() {
                 }
 
                 override fun onPageSelected(position: Int) {
-                    for (i in 0 until roomData.images.size) {
-                        if (dot_container.getChildAt(i) != null)
-                            if (i == position) {
-                                (dot_container.getChildAt(i) as ImageView).setImageResource(R.drawable.active_squire)
-                            } else {
-                                (dot_container.getChildAt(i) as ImageView).setImageResource(R.drawable.n_active_squire)
-                            }
-                    }
+                    createDotes(position)
                 }
             })
 
@@ -137,7 +107,7 @@ class RoomDetailsActivity : BaseActivity() {
 
 
         // listen for select time changes
-        viewmodel.sellectTimeChangeLiveData.observe(this, Observer {
+        viewmodel.selectTimeChangeLiveData.observe(this, Observer {
             if (it.isEmpty()) {
                 book_btn.visibility = View.GONE
             } else {
@@ -146,55 +116,35 @@ class RoomDetailsActivity : BaseActivity() {
             }
 
         })
-
-        // listen for booking api response
-        viewmodel.bookRoomLiveData.observe(this, Observer {
-            hideLoading()
-            if (it == null) {
-                // show user error
-                Snackbar.make(main_view, "some thing go wrong try again", Snackbar.LENGTH_SHORT).show()
-
-            } else {
-
-                // if book success
-                if (it.has("success")) {
-                    // save event data to db
-                    viewmodel.saveEventtoDb()
-
-                }
-                // if book fail show message with error
-                else if (it.has("error")) {
-                    val error = gson.fromJson(it, ResponseError::class.java)
-                    Snackbar.make(main_view, error.error.text, Snackbar.LENGTH_SHORT).show()
-                }
-
-
-            }
-
+//show or hide loading dialog
+        viewmodel.getShowLoading().observe(this, Observer {
+            if (it)
+                showLoading()
+            else
+                hideLoading()
 
         })
+
+        // show returned message
+        viewmodel.getMessage().observe(this, Observer {
+            Snackbar.make(container, it, Snackbar.LENGTH_SHORT).show()
+        })
+
 
         /**
          * listen for result of saving event on device
          * helps to show action done for user or not
          */
-        viewmodel.saveEvent.observe(this, Observer {
+        viewmodel.getBookRoomResult().observe(this, Observer {
             if (it) {
                 val doneFragment = DoneFragment()
-                val bundel = Bundle()
-                bundel.putString("date", viewmodel.date)
-                bundel.putString("time", viewmodel.selectedTimes)
-                doneFragment.arguments = bundel
+                val bundle = Bundle()
+                bundle.putString("date", viewmodel.date)
+                bundle.putString("time", viewmodel.selectedTimes)
+                doneFragment.arguments = bundle
                 supportFragmentManager.beginTransaction().replace(R.id.container, doneFragment).commit()
             }
 
-
-        })
-
-        // listen for times filter
-        viewmodel.timesLiveData.observe(this, Observer {
-
-            timesAdapter.updateTimes(it)
 
         })
 
@@ -248,16 +198,11 @@ class RoomDetailsActivity : BaseActivity() {
             return
         }
 
-        // show loading
-        showLoading()
-        if (!viewmodel.bookTimes(
-                event_title.editText!!.text.toString().trim(),
-                event_description.editText!!.text.toString(),
-                passesAdapter.getpasses()!!
-            )
-        ) {
-            hideLoading()
-        }
+        viewmodel.bookTimes(
+            event_title.editText!!.text.toString().trim(),
+            event_description.editText!!.text.toString(),
+            passesAdapter.getpasses()!!
+        )
 
     }
 
@@ -268,6 +213,28 @@ class RoomDetailsActivity : BaseActivity() {
      *
      * */
     fun addpass(view: View) {
+        addOrUpdateParticipate(0, null)
+    }
+
+
+    override fun editParticipate(position: Int, participate: Participate) {
+
+        addOrUpdateParticipate(position, participate)
+    }
+
+
+    /**
+     * create dialog to add or edit participace
+     * if participate == null that means it will add new one
+     * if not it will update it
+     * **/
+
+    fun addOrUpdateParticipate(position: Int, participate: Participate?) {
+
+        //check for number of participate if less than room capacity
+        if (participate == null && !viewmodel.checkForParticipateCapcity(passesAdapter.itemCount)) {
+            return
+        }
         val dialog = AlertDialog.Builder(this)
         val form = LayoutInflater.from(this).inflate(R.layout.add_pass_dialog_form, null, false)
         dialog.setView(form)
@@ -277,6 +244,15 @@ class RoomDetailsActivity : BaseActivity() {
         val name = form.findViewById<TextInputLayout>(R.id.name_value)
         val email = form.findViewById<TextInputLayout>(R.id.email_value)
         val phone = form.findViewById<TextInputLayout>(R.id.phone_value)
+        if (participate != null) {
+            name.editText?.text?.append(participate.name)
+            email.editText?.text?.append(participate.email)
+            phone.editText?.text?.append(participate.number)
+            add.setText(R.string.update)
+        }
+
+
+
         add.setOnClickListener {
             if (name.editText?.text.toString().isEmpty()) {
                 name.error = "enter name"
@@ -290,22 +266,51 @@ class RoomDetailsActivity : BaseActivity() {
                 phone.error = "enter valid phone"
                 return@setOnClickListener
             }
-            //Todo check if phone has code or not
 
+            if (participate != null) {
+                participate.name = name.editText?.text.toString()
+                participate.email = email.editText?.text.toString()
+                participate.number = phone.editText?.text.toString()
 
-            passesAdapter.addPasses(
-                Passes(
-                    name.editText?.text.toString(),
-                    email.editText?.text.toString(),
-                    phone.editText?.text.toString()
+                passesAdapter.notifyItemChanged(position)
+
+            } else
+
+                passesAdapter.addPasses(
+                    Participate(
+                        name.editText?.text.toString(),
+                        email.editText?.text.toString(),
+                        phone.editText?.text.toString()
+                    )
                 )
-            )
             alert.dismiss()
 
+        }
 
+    }
+
+    // create dots for image slider
+    fun createDotes(position: Int) {
+
+        dot_container.removeAllViews()
+        for (i in viewmodel.room!!.images) {
+            val image = ImageView(this)
+            val params = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            params.setMargins(8, 0, 8, 0)
+
+            image.layoutParams = params
+            if (position == viewmodel.room!!.images.indexOf(i))
+                image.setImageResource(R.drawable.active_squire)
+            else
+                image.setImageResource(R.drawable.n_active_squire)
+            dot_container.addView(image)
         }
 
 
     }
+
 
 }

@@ -21,7 +21,7 @@ class AddWorkSpaceVewModel : ViewModel() {
 
     /**
      * call api get work space
-     *
+     *if workspace found it will add it to database and when back to workspaces Activity realm change listener will update view
      * */
     fun addWorkSpace(url: String) {
         if (apiManager != null) {
@@ -33,13 +33,17 @@ class AddWorkSpaceVewModel : ViewModel() {
                     .subscribeWith(object : DisposableSingleObserver<WorkSpace>() {
                         override fun onSuccess(t: WorkSpace) {
                             // add workspace to Db
+
                             val realm = Realm.getDefaultInstance()
                             t.link = url
-                            realm.beginTransaction()
-                            realm.insertOrUpdate(t)
-                            realm.commitTransaction()
+                            realm.executeTransaction {
+                                realm.insertOrUpdate(t)
+                            }
                             realm.close()
+
+                            // hide loading dialog
                             loading.postValue(false)
+                            // notify that request success
                             success.postValue(true)
 
 

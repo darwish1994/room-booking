@@ -1,29 +1,48 @@
 package com.dac.roombooking.view.adapter
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
 import com.dac.roombooking.R
+import com.dac.roombooking.data.callbacks.RoomSelectListener
 import com.dac.roombooking.data.model.Room
-import com.dac.roombooking.view.RoomDetailsActivity
+import com.dac.roombooking.viewmodel.WorkSpaceViewModel
 import kotlinx.android.synthetic.main.room_item_layout.view.*
-import timber.log.Timber
 
 
-class RoomAdapter(val context: Context, val url: String) : RecyclerView.Adapter<RoomAdapter.RoomViewHolder>() {
-    private val inflator = LayoutInflater.from(context)
+/**
+ * adapter to show rooms and photo slider and
+ * listen for changes
+ *
+ * */
+
+class RoomAdapter(
+    val url: String,
+    viewModel: WorkSpaceViewModel,
+    lifecycleOwner: LifecycleOwner,
+    private val listener: RoomSelectListener
+) : RecyclerView.Adapter<RoomAdapter.RoomViewHolder>() {
     private var rooms: List<Room>? = null
-    private var date: String? = null
+
+    init {
+        viewModel.getRoomLiveData().observe(lifecycleOwner, Observer {
+            rooms = it
+            notifyDataSetChanged()
+        })
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RoomViewHolder {
-        return RoomViewHolder(inflator.inflate(R.layout.room_item_layout, parent, false))
+        return RoomViewHolder(
+            LayoutInflater.from(parent.context).inflate(R.layout.room_item_layout, parent, false),
+            listener
+        )
     }
 
     override fun getItemCount(): Int {
@@ -38,45 +57,66 @@ class RoomAdapter(val context: Context, val url: String) : RecyclerView.Adapter<
         if (rooms != null) {
 
             // get room
-            val room = rooms!![position]
-            holder.roomTitle.text = room.name
-            holder.capacity.text = "${room.capacity}"
-            holder.location.text = room.location
+            holder.bind(rooms!![position])
+        }
 
-            var equipment = ""
+
+    }
+
+
+    fun getrooms(): List<Room>? {
+        return rooms
+    }
+
+    inner class RoomViewHolder(itemView: View, listener: RoomSelectListener) : RecyclerView.ViewHolder(itemView) {
+        private val imageSwitcher: ViewPager = itemView.slider
+        private val availavble = itemView.availablity
+        private val roomTitle = itemView.room_title
+        private val location = itemView.location_value
+        private val size = itemView.size_value
+        private val capacity = itemView.capacity_value
+        private val equipment = itemView.equipment_value
+        private val dots_containers = itemView.dot_containerr
+        private lateinit var room: Room
+
+        init {
+            itemView.setOnClickListener {
+                if (::room.isInitialized) {
+                    listener.selectRoom(room)
+                }
+            }
+        }
+
+
+        @SuppressLint("SetTextI18n")
+        fun bind(item: Room) {
+            room = item
+
+            roomTitle.text = room.name
+            capacity.text = "${room.capacity}"
+            location.text = room.location
+
+            var equipmentValue = ""
             for (i in room.equipment)
-                equipment += "$i, "
-            holder.equipment.text = equipment
+                equipmentValue += "$i, "
+            equipment.text = equipmentValue
 
-            holder.size.text = room.size
+            size.text = room.size
 
             if (room.avail.isNullOrEmpty()) {
-                holder.availavble.setBackgroundResource(R.drawable.not_availble_bg)
-                holder.availavble.text = "NAv"
+                availavble.setBackgroundResource(R.drawable.not_availble_bg)
+                availavble.text = "NAv"
             } else {
-                holder.availavble.setBackgroundResource(R.drawable.availble_bg)
-                holder.availavble.text = "Av ${room.avail.size}"
+                availavble.setBackgroundResource(R.drawable.availble_bg)
+                availavble.text = "Av ${room.avail.size}"
             }
 
-            val pagerAdapter = ViewPagerAdapter(context, room.images, url)
-            holder.imageSwitcher.adapter = pagerAdapter
+            val pagerAdapter = ViewPagerAdapter(room.images, url)
+            imageSwitcher.adapter = pagerAdapter
 
-            holder.dots_containers.removeAllViews()
-            for (i in room.images) {
-                val image = ImageView(context)
 
-                val params = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                params.setMargins(8, 0, 8, 0)
-
-                image.layoutParams = params
-                image.setImageResource(R.drawable.n_active_squire)
-                holder.dots_containers.addView(image)
-            }
-
-            holder.imageSwitcher.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            createDotes(0)
+            imageSwitcher.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
                 override fun onPageScrollStateChanged(state: Int) {
 
                 }
@@ -85,56 +125,41 @@ class RoomAdapter(val context: Context, val url: String) : RecyclerView.Adapter<
                 }
 
                 override fun onPageSelected(position: Int) {
-                    Timber.v("scrole  postion %s", position)
-                    for (i in 0 until room.images.size) {
-                        if (holder.dots_containers.getChildAt(i) != null)
-                            if (i == position) {
-                                (holder.dots_containers.getChildAt(i) as ImageView).setImageResource(R.drawable.active_squire)
-                            } else {
-                                (holder.dots_containers.getChildAt(i) as ImageView).setImageResource(R.drawable.n_active_squire)
-
-                            }
-                    }
+                    createDotes(position)
 
                 }
             })
-            holder.room_item.setOnClickListener {
-                // check for user select date
-                if (date != null) {
-                    val intent = Intent(context, RoomDetailsActivity::class.java)
-                    intent.putExtra("room", room)
-                    intent.putExtra("url", url)
-                    intent.putExtra("date", date)
-                    context.startActivity(intent)
-                }
-            }
+
 
         }
 
+        /**
+         * create dots for slider
+         *
+         *
+         * */
+        fun createDotes(position: Int) {
 
+            dots_containers.removeAllViews()
+            for (i in room.images) {
+                val image = ImageView(itemView.context)
+                val params = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                params.setMargins(8, 0, 8, 0)
+
+                image.layoutParams = params
+                if (position == room.images.indexOf(i))
+                    image.setImageResource(R.drawable.active_squire)
+                else
+                    image.setImageResource(R.drawable.n_active_squire)
+                dots_containers.addView(image)
+            }
+
+
+        }
     }
 
-    fun updateRooms(data: List<Room>?, date: String) {
-        rooms = data
-        this.date = date
-        notifyDataSetChanged()
-    }
 
-    fun getrooms(): List<Room>? {
-        return rooms
-    }
-
-    inner class RoomViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imageSwitcher = itemView.slider
-        val availavble = itemView.availablity
-        val roomTitle = itemView.room_title
-        val location = itemView.location_value
-        val size = itemView.size_value
-        val capacity = itemView.capacity_value
-        val equipment = itemView.equipment_value
-        val dots_containers = itemView.dot_containerr
-        val room_item = itemView.room_item
-
-
-    }
 }

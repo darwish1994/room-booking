@@ -5,6 +5,9 @@ import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
 
+/**
+ * Parcelize it make object parcaple to move between activity
+ * */
 @Parcelize
 data class Room(
     @SerializedName("name")

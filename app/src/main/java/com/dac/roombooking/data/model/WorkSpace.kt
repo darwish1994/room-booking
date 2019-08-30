@@ -6,6 +6,9 @@ import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 import kotlinx.android.parcel.Parcelize
 
+/**
+ * Parcelize it make object parcaple to move between activity
+ * */
 @Parcelize
 open class WorkSpace(
 

@@ -1,17 +1,32 @@
 package com.dac.roombooking.view.adapter
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import com.dac.roombooking.R
 import com.dac.roombooking.viewmodel.RoomViewModel
 import kotlinx.android.synthetic.main.time_item_layout.view.*
 
-class BookTimeAdapter(val context: Context, val viewmodel: RoomViewModel) :
+/**
+ * adapter for view available time for user
+ * it listen for changes from view model
+ *
+ * ***/
+class BookTimeAdapter(private val viewModel: RoomViewModel, lifecycleOwner: LifecycleOwner) :
     RecyclerView.Adapter<BookTimeAdapter.BookTimeViewHolder>() {
-    private var times: List<String>? = null
+    private val times: ArrayList<String> = arrayListOf()
+
+    init {
+        viewModel.getFilterdTimes().observe(lifecycleOwner, Observer {
+            times.clear()
+            times.addAll(it)
+            notifyDataSetChanged()
+        })
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookTimeViewHolder {
         return BookTimeViewHolder(
@@ -19,51 +34,48 @@ class BookTimeAdapter(val context: Context, val viewmodel: RoomViewModel) :
                 R.layout.time_item_layout,
                 parent,
                 false
-            )
+            ),
+            viewModel
         )
 
     }
 
     override fun getItemCount(): Int {
-        if (times != null)
-            return times!!.size
-        return 0
-
+        return times.size
     }
 
     override fun onBindViewHolder(holder: BookTimeViewHolder, position: Int) {
-        if (times != null) {
-            val time = times!![position]
+        holder.bind(times[position])
+    }
+
+
+    inner class BookTimeViewHolder(itemView: View, val viewModel: RoomViewModel) : RecyclerView.ViewHolder(itemView) {
+
+        private val checked = itemView.time_check
+        private val startTime = itemView.start_time
+        private val endTime = itemView.end_time
+        private val time_item = itemView.time_item
+
+        private lateinit var time: String
+
+        fun bind(item: String) {
+            time = item
             val parts = time.split("-")
             if (!parts.isNullOrEmpty() && parts.size > 1) {
-                holder.startTime.text = parts[0]
-                holder.endTime.text = parts[1]
+                startTime.text = parts[0]
+                endTime.text = parts[1]
             }
 
-            holder.checked.isChecked = viewmodel.selectedTimes.equals(time, false)
+            checked.isChecked = viewModel.selectedTimes.equals(time, false)
 
-            holder.time_item.setOnClickListener {
-                viewmodel.selectedTimes = time
-                viewmodel.sellectTimeChangeLiveData.value = time
+            time_item.setOnClickListener {
+                viewModel.selectedTimes = time
+                viewModel.selectTimeChangeLiveData.value = time
                 notifyDataSetChanged()
             }
 
 
         }
-
-    }
-
-    fun updateTimes(data: List<String>?) {
-        times = data
-        notifyDataSetChanged()
-    }
-
-    inner class BookTimeViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-        val checked = itemView.time_check
-        val startTime = itemView.start_time
-        val endTime = itemView.end_time
-        val time_item = itemView.time_item
 
 
     }

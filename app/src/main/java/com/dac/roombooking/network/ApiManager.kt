@@ -10,7 +10,10 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-
+/**
+ * api manager which handel get instance from retrofit and create request for api
+ *
+ * */
 object ApiManager {
     private var retrofit: Retrofit? = null
     private val REQUEST_TIMEOUT = 60

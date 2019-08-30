@@ -9,5 +9,6 @@ open class Event(
     var id: String? = UUID.randomUUID().toString(),
     var room: String? = null,
     var date: String? = null,
-    var times: String? = null
+    var times: String? = null,
+    var workSpace: String? = null
 ) : RealmObject()
